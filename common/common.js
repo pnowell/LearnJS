@@ -39,14 +39,17 @@ function optimizeCanvasScale(canvas) {
   ctx.scale(scale, scale);
 
   canvas.needsReoptimization = false;
-  canvas.onresize = function() {
-    canvas.needsReoptimization = true;
-  };
-  ctx.clearOptimized = function() {
-    if (canvas.needsReoptimization) {
-      optimizeCanvasScale(canvas);
-    } else {
-      ctx.clearRect(0, 0, canvas.originalWidth, canvas.originalHeight);
+  if (!('clearOptimized' in ctx)) {
+    window.addEventListener('resize', function() {
+      console.log("resize event");
+      canvas.needsReoptimization = true;
+    });
+    ctx.clearOptimized = function() {
+      if (canvas.needsReoptimization) {
+        optimizeCanvasScale(canvas);
+      } else {
+        ctx.clearRect(0, 0, canvas.originalWidth, canvas.originalHeight);
+      }
     }
   }
 }
