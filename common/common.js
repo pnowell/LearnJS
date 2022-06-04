@@ -37,4 +37,16 @@ function optimizeCanvasScale(canvas) {
     canvas.width = canvas.height * canvasAspect;
   }
   ctx.scale(scale, scale);
+
+  canvas.needsReoptimization = false;
+  canvas.onresize = function() {
+    canvas.needsReoptimization = true;
+  };
+  ctx.clearOptimized = function() {
+    if (canvas.needsReoptimization) {
+      optimizeCanvasScale(canvas);
+    } else {
+      ctx.clearRect(0, 0, canvas.originalWidth, canvas.originalHeight);
+    }
+  }
 }

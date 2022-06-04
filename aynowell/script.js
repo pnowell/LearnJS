@@ -11,8 +11,7 @@ onDocReady(function() {
 function update(dt) {
   let ctx = canvas.getContext('2d');
 
-  //ctx.clearRect(0, 0, canvas.originalWidth, canvas.originalHeight);
-  optimizeCanvasScale(canvas);
+  ctx.clearOptimized();
 
   ctx.save();
   ctx.resetTransform();
