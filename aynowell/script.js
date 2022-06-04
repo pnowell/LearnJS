@@ -1,7 +1,6 @@
 import { onDocReady, onUpdate, optimizeCanvasScale } from '/LearnJS/common/common.js';
 
 let canvas;
-let everReoptimized = false;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
