@@ -1,4 +1,4 @@
-import { onDocReady, onUpdate, optimizeCanvasScale } from '/common/common.js';
+import { onDocReady, onUpdate, optimizeCanvasScale } from '/LearnJS/common/common.js';
 
 let canvas;
 
