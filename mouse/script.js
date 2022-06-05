@@ -10,10 +10,11 @@ onDocReady(function() {
   ctx = canvas.getContext('2d');
 
   optimizeCanvasScale(canvas);
-  startUpdateLoop(onUpdate);
   canvas.addEventListener("mousedown", onMouseDown);
   canvas.addEventListener("mouseup", onMouseUp);
   canvas.addEventListener("mousemove", onMouseMove);
+
+  startUpdateLoop(onUpdate);
 });
 
 let mouseIsDown = false;

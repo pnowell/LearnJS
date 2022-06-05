@@ -1,16 +1,17 @@
 import { onDocReady, startUpdateLoop, optimizeCanvasScale } from '/LearnJS/common/common.js';
 
 let canvas;
+let ctx;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
+  ctx = canvas.getContext('2d');
+
   optimizeCanvasScale(canvas);
   startUpdateLoop(onUpdate);
 });
 
 function onUpdate(dt) {
-  let ctx = canvas.getContext('2d');
-
   ctx.clearOptimized();
 
   ctx.save();
