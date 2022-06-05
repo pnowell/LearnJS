@@ -1,16 +1,16 @@
-export { onDocReady, onUpdate, optimizeCanvasScale };
+export { onDocReady, startUpdateLoop, optimizeCanvasScale };
 
 function onDocReady(fn) {
   document.addEventListener('DOMContentLoaded', fn);
 }
 
-function onUpdate(fn) {
+function startUpdateLoop(fn) {
   let prevTime = performance.now();
 
   requestAnimationFrame(function callUpdateFunction(currTime) {
     let dt = currTime - prevTime;
     prevTime = currTime;
-    if (fn(dt)) {
+    if (fn(dt / 1000.0)) {
       requestAnimationFrame(callUpdateFunction);
     }
   });
@@ -26,29 +26,35 @@ function optimizeCanvasScale(canvas) {
   }
   let canvasAspect = canvas.originalWidth / canvas.originalHeight;
   let clientAspect = canvas.clientWidth / canvas.clientHeight;
-  let scale = Math.min(
+  canvas.scale = Math.min(
     canvas.clientWidth / canvas.originalWidth,
     canvas.clientHeight / canvas.originalHeight);
   if (canvasAspect > clientAspect) {
     canvas.width = canvas.clientWidth;
-    canvas.height = canvas.width / canvasAspect;
+    canvas.height = canvas.width / clientAspect;
   } else {
     canvas.height = canvas.clientHeight;
-    canvas.width = canvas.height * canvasAspect;
+    canvas.width = canvas.height * clientAspect;
   }
-  ctx.scale(scale, scale);
+  ctx.scale(canvas.scale, canvas.scale);
+  ctx.getMousePos = function(e) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - canvas.clientLeft - rect.left) / canvas.scale,
+      y: (e.clientY - canvas.clientTop - rect.top) / canvas.scale
+    }
+  }
 
   canvas.needsReoptimization = false;
   if (!('clearOptimized' in ctx)) {
     window.addEventListener('resize', function() {
-      console.log("resize event");
       canvas.needsReoptimization = true;
     });
     ctx.clearOptimized = function() {
       if (canvas.needsReoptimization) {
         optimizeCanvasScale(canvas);
       } else {
-        ctx.clearRect(0, 0, canvas.originalWidth, canvas.originalHeight);
+        ctx.clearRect(0, 0, canvas.width / canvas.scale, canvas.height / canvas.scale);
       }
     }
   }
