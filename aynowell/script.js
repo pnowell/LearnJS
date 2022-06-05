@@ -16,7 +16,7 @@ function onUpdate(dt) {
   ctx.save();
   ctx.resetTransform();
   ctx.font = "20px sans-serif";
-  ctx.fillText("dt = " + dt.toFixed(2) + " ms", 5, 25);
+  ctx.fillText("dt = " + (dt * 1000).toFixed(2) + " ms", 5, 25);
   ctx.fillText("canvas.width = " + canvas.width, 5, 50);
   ctx.fillText("canvas.height = " + canvas.height, 5, 75);
   ctx.restore();
