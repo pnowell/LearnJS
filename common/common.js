@@ -44,6 +44,12 @@ function optimizeCanvasScale(canvas) {
       y: (e.clientY - canvas.clientTop - rect.top) / canvas.scale
     }
   }
+  ctx.getMouseMovement = function(e) {
+    return {
+      x: e.movementX / canvas.scale,
+      y: e.movementY / canvas.scale
+    };
+  }
 
   canvas.needsReoptimization = false;
   if (!('clearOptimized' in ctx)) {

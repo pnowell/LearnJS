@@ -1,8 +1,10 @@
 import { onDocReady, startUpdateLoop, optimizeCanvasScale } from '/LearnJS/common/common.js';
+import { V2 } from '/LearnJS/common/v2.js';
 
-const gravity = -50;
+const gravity = new V2(0, 50);
 let canvas;
 let ctx;
+let lastDt;
 let particles = [];
 
 onDocReady(function() {
@@ -29,14 +31,15 @@ function onMouseUp(e) {
 function onMouseMove(e) {
   if (mouseIsDown) {
     particles.push({
-      pos: ctx.getMousePos(e),
-      vel: {x: 0, y: 0},
+      pos: new V2(ctx.getMousePos(e)),
+      vel: new V2(ctx.getMouseMovement(e)).times(10),
       startTime: performance.now()
     });
   }
 }
 
 function onUpdate(dt) {
+  lastDt = dt;
   // Update particles
   let time = performance.now();
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -46,8 +49,8 @@ function onUpdate(dt) {
       continue;
     }
 
-    p.vel.y += dt * gravity;
-    p.pos.y -= dt * p.vel.y;
+    p.vel = p.vel.plus(gravity.times(dt));
+    p.pos = p.pos.plus(p.vel.times(dt));
   }
 
   // Draw the particles
