@@ -17,6 +17,21 @@ class V2 {
     }
   }
 
+  plusEquals(other) {
+    this.x += other.x;
+    this.y += other.y;
+  }
+
+  minusEquals(other) {
+    this.x -= other.x;
+    this.y -= other.y;
+  }
+
+  timesEquals(scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+  }
+
   plus(other) {
     return new V2(this.x + other.x, this.y + other.y);
   }

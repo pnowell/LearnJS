@@ -1,4 +1,7 @@
-export { onDocReady, startUpdateLoop, optimizeCanvasScale };
+export {
+  onDocReady, startUpdateLoop, optimizeCanvasScale, diagonalToVerticalFov,
+  toDeg, toRad
+};
 
 function onDocReady(fn) {
   document.addEventListener('DOMContentLoaded', fn);
@@ -64,4 +67,16 @@ function optimizeCanvasScale(canvas) {
       }
     }
   }
+}
+
+function toRad(deg) {
+  return deg * Math.PI / 180;
+}
+
+function toDeg(rad) {
+  return rad * 180 / Math.PI;
+}
+
+function diagonalToVerticalFov(dfov, aspect) {
+  return 2 * Math.atan(Math.tan(dfov / 2) / Math.sqrt(1 + aspect * aspect));
 }

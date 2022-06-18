@@ -49,8 +49,8 @@ function onUpdate(dt) {
       continue;
     }
 
-    p.vel = p.vel.plus(gravity.times(dt));
-    p.pos = p.pos.plus(p.vel.times(dt));
+    p.vel.plusEquals(gravity.times(dt));
+    p.pos.plusEquals(p.vel.times(dt));
   }
 
   // Draw the particles
