@@ -1,6 +1,6 @@
 export {
-  onDocReady, startUpdateLoop, optimizeCanvasScale, diagonalToVerticalFov,
-  toDeg, toRad
+  onDocReady, startUpdateLoop, animationLoopWrapper, optimizeCanvasScale,
+  diagonalToVerticalFov, toDeg, toRad
 };
 
 function onDocReady(fn) {
@@ -17,6 +17,16 @@ function startUpdateLoop(fn) {
       requestAnimationFrame(callUpdateFunction);
     }
   });
+}
+
+function animationLoopWrapper(fn) {
+  let prevTime = performance.now();
+
+  return function (currTime) {
+    let dt = currTime - prevTime;
+    prevTime = currTime;
+    fn(dt / 1000.0);
+  };
 }
 
 function optimizeCanvasScale(canvas) {
