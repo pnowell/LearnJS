@@ -18,11 +18,13 @@ import {
 
 let canvas;
 let ctx;
-let beads = [];
-let pegs = [];
+let beads = null;
+let pegs = null;
 let dragging = null;
 let mouseMoved = false;
 let beadSpawnTime = 0;
+let moduleSelect;
+let mod = null;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
@@ -32,35 +34,53 @@ onDocReady(function() {
   canvas.addEventListener("mousedown", onMouseDown);
   canvas.addEventListener("mouseup", onMouseUp);
   canvas.addEventListener("mousemove", onMouseMove);
-
-  // Create initial pegs
-  pegs = initializePegs();
+  moduleSelect = document.getElementById('moduleSelect');
+  moduleSelect.addEventListener('change', loadSelectedModule);
 
   startUpdateLoop(onUpdate);
+  loadSelectedModule();
 });
 
+async function loadSelectedModule() {
+  // First set mod to null to stop updates / etc
+  mod = null;
+
+  let options = moduleSelect.options;
+  let moduleName = './' + options[options.selectedIndex].value;
+
+  // Then trigger the load of the module and set it to mod
+  mod = await import(moduleName);
+
+  // Reset things now that we have the new module loaded
+  pegs = mod.initializePegs();
+  beads = [];
+  beadSpawnTime = 0;
+  dragging = null;
+}
+
 function onUpdate(dt) {
+  if (mod === null) return true;
   // Draw the particles
   ctx.clearOptimized();
 
   // Spawn beads
   beadSpawnTime += dt;
-  let maxBeadsValue = maxBeads();
-  let maxBeadsPerSecondValue = maxBeadsPerSecond();
+  let maxBeadsValue = mod.maxBeads();
+  let maxBeadsPerSecondValue = mod.maxBeadsPerSecond();
   if (beads.length < maxBeadsValue) {
     let spawnCount = Math.floor(beadSpawnTime * maxBeadsPerSecondValue);
     beadSpawnTime -= spawnCount * (1 / maxBeadsPerSecondValue);
 
     spawnCount = Math.min(spawnCount, maxBeadsValue - beads.length);
     for (let i = 0; i < spawnCount; i++) {
-      beads.push(createBead());
+      beads.push(mod.createBead());
     }
   }
 
   // Update beads
   for (let i = beads.length - 1; i >= 0; i--) {
     let b = beads[i];
-    if (updateBead(b, dt, pegs)) {
+    if (mod.updateBead(b, dt, pegs)) {
       beads.splice(i, 1);
       continue;
     }
@@ -71,7 +91,7 @@ function onUpdate(dt) {
       if (collision === null) {
         continue;
       }
-      if (collideBead(b, pegs[j], collision)) {
+      if (mod.collideBead(b, pegs[j], collision)) {
         beads.splice(i, 1);
         break;
       }
@@ -102,11 +122,11 @@ function onMouseUp(e) {
   if (!mouseMoved) {
     let pegIndex = findPegIndex(e);
     if (pegIndex >= 0) {
-      if (shouldDeletePeg(pegs[pegIndex])) {
+      if (mod.shouldDeletePeg(pegs[pegIndex])) {
         pegs.splice(pegIndex, 1);
       }
     } else {
-      let peg = createPeg(ctx.getMousePos(e));
+      let peg = mod.createPeg(ctx.getMousePos(e));
       if (peg !== null) {
         pegs.push(peg);
       }

@@ -21,6 +21,7 @@ body {
   padding: 32px;
   display: flex;
   flex-direction: column;
+  flex: 0 0 80px;
 }
 
 #canvas {
