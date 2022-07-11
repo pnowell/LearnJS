@@ -9,12 +9,22 @@ function onDocReady(fn) {
   document.addEventListener('DOMContentLoaded', fn);
 }
 
-function startUpdateLoop(fn) {
+function startUpdateLoop(fn, minimumFrameMillis) {
   let prevTime = performance.now();
+  if (minimumFrameMillis === undefined) {
+    minimumFrameMillis = 0;
+  }
 
   requestAnimationFrame(function callUpdateFunction(currTime) {
     let dt = currTime - prevTime;
+
+    if (dt < minimumFrameMillis) {
+      requestAnimationFrame(callUpdateFunction);
+      return;
+    }
+
     prevTime = currTime;
+
     if (fn(dt / 1000.0)) {
       requestAnimationFrame(callUpdateFunction);
     }
