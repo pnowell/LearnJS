@@ -3,6 +3,8 @@ export {
   diagonalToVerticalFov, toDeg, toRad
 };
 
+import { V2 } from '/LearnJS/common/v2.js';
+
 function onDocReady(fn) {
   document.addEventListener('DOMContentLoaded', fn);
 }
@@ -52,16 +54,16 @@ function optimizeCanvasScale(canvas) {
   ctx.scale(canvas.scale, canvas.scale);
   ctx.getMousePos = function(e) {
     var rect = canvas.getBoundingClientRect();
-    return {
-      x: (e.clientX - canvas.clientLeft - rect.left) / canvas.scale,
-      y: (e.clientY - canvas.clientTop - rect.top) / canvas.scale
-    }
+    return new V2(
+      (e.clientX - canvas.clientLeft - rect.left) / canvas.scale,
+      (e.clientY - canvas.clientTop - rect.top) / canvas.scale
+    );
   }
   ctx.getMouseMovement = function(e) {
-    return {
-      x: e.movementX / canvas.scale,
-      y: e.movementY / canvas.scale
-    };
+    return new V2(
+      e.movementX / canvas.scale,
+      e.movementY / canvas.scale
+    );
   }
 
   canvas.needsReoptimization = false;

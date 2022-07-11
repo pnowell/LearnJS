@@ -17,19 +17,26 @@ class V2 {
     }
   }
 
+  copy() {
+    return new V2(this);
+  }
+
   plusEquals(other) {
     this.x += other.x;
     this.y += other.y;
+    return this;
   }
 
   minusEquals(other) {
     this.x -= other.x;
     this.y -= other.y;
+    return this;
   }
 
   timesEquals(scalar) {
     this.x *= scalar;
     this.y *= scalar;
+    return this;
   }
 
   plus(other) {
@@ -44,8 +51,12 @@ class V2 {
     return new V2(this.x * scalar, this.y * scalar);
   }
 
+  dot(other) {
+    return this.x * other.x + this.y * other.y;
+  }
+
   lengthSqr() {
-    return this.x * this.x + this.y * this.y;
+    return this.dot(this);
   }
 
   length() {
