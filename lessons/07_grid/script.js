@@ -70,6 +70,9 @@ function onUpdate(dt) {
   if (running) {
     dtAcc += dt;
     if (dtAcc >= minDtAcc || runOnce) {
+      if (runOnce) {
+        dtAcc = minDtAcc;
+      }
       mod.updateGrid(grid, dtAcc);
       dtAcc = 0;
       if (runOnce) {
@@ -108,6 +111,7 @@ function resetGrid() {
 function toggleRunState(e) {
   running = !running;
   runOnce = false;
+  dtAcc = 0;
   refreshRunToggle();
 }
 
