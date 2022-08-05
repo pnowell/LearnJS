@@ -17,16 +17,18 @@ function updateGrid(grid, dt) {
     }
   }
   for (let x = 0; x < grid.length; x++) {
-    let xMin = Math.max(0, x - 1);
-    let xMax = Math.min(grid.length - 1, x + 1);
     for (let y = 0; y < grid[x].length; y++) {
       if (grid[x][y].alive) {
-        let yMin = Math.max(0, y - 1);
-        let yMax = Math.min(grid[x].length - 1, y + 1);
-        for (let i = xMin; i <= xMax; i++) {
-          for (let j = yMin; j <= yMax; j++) {
+        for (let i = x - 1; i <= x + 1; i++) {
+          for (let j = y - 1; j <= y + 1; j++) {
             if (i == x && j == y) continue;
-            sums[i][j] += 1;
+            let iWrap = i;
+            let jWrap = j;
+            if (iWrap < 0) iWrap += grid.length;
+            if (iWrap >= grid.length) iWrap -= grid.length;
+            if (jWrap < 0) jWrap += grid[iWrap].length;
+            if (jWrap >= grid[iWrap].length) jWrap -= grid[iWrap].length;
+            sums[iWrap][jWrap] += 1;
           }
         }
       }

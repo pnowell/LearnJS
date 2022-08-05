@@ -14,6 +14,8 @@ function initGrid(grid) {
       cell.seedTimer = -1;
       cell.stemTimer = -1;
       cell.stemCount = 0;
+      // Add a flowerTimer (set to -1) and                  **********
+      // a flowerCount (set to 0)                           **********
       if (y <= grid[x].length / 2) {
         cell.sky = true;
       } else {
@@ -67,6 +69,8 @@ function updateGrid(grid, dt) {
 
             // Inside the if statement set a flowerTimer    **********
             // and a flowerCount.                           **********
+            // Remember to set flowerCount to a random      **********
+            // number in some range (for example 2 to 5).   **********
 
             // Then you can put these lines in the "else"   **********
             // block of that if statement.                  **********
