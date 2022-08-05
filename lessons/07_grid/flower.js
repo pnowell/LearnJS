@@ -1,6 +1,8 @@
 export { initGrid, updateGrid, drawGrid, onMouseDown, onMouseDrag, onMouseUp };
 
 // ******************************************************************
+// Today we're adding a new phase to the plant growth.  Once the stem
+// finishes growing, we'll start a flower at that spot.
 // ******************************************************************
 
 function initGrid(grid) {
@@ -21,6 +23,10 @@ function initGrid(grid) {
   }
 }
 
+function randomNumberPicker(low, high) {
+  return Math.floor(low + Math.random() * (high - low));
+}
+
 function updateGrid(grid, dt) {
   for (let x = 0; x < grid.length; x++) {
     for (let y = 0; y < grid[x].length; y++) {
@@ -34,42 +40,7 @@ function updateGrid(grid, dt) {
         if (cell.seedTimer <= 0) {
           // Start a stem growing at this cell
           cell.stemTimer = 0.5;
-          cell.stemCount = 10;  // Let's change this line   **********
-          // Instead of setting it to 10, you can randomize **********
-          // how tall it will grow using the Math.random()  **********
-          // function.  Math.random() will give you a       **********
-          // number between 0 and 1 (for example: 0.372).   **********
-          // So if you want something that will give you.   **********
-          // a number between 0 and 10 you could do         **********
-
-          // Math.random() * 10                             **********
-
-          // But that might occasionally give you 0 and you **********
-          // don't ever want it to be that low.  Let's say  **********
-          // you always want it to be at least 3 long and   **********
-          // at most 10 long.  For that you want something  **********
-          // like:                                          **********
-
-          // 3 + a random number between 0 and 7            ********** (A)
-          // Take a moment to make sure you understand that **********
-          // If your random number is 0, you'll get 3       **********
-          // (becase you always add 3 onto it), and if your **********
-          // random number is 7, then you'll get 10.        **********
-
-          // So how do you get a random number between 0    **********
-          // and 7?  See if you can finish writing the code **********
-          // in line (A) above.  (hint, I've already told   **********
-          // you how to get a random number between 0 and   **********
-          // some upper number, right?)
-
-          // Once you have that, there's one more step.     **********
-          // You're now getting a number between 3 and 10,  **********
-          // but it's a fractional number like 6.9274 but   **********
-          // we want whole numbers only.  To do that you    **********
-          // use the Math.floor() function.  Take the code  **********
-          // you wrote for line (A) and ...                 **********
-          // cell.stemCount = Math.floor(*PUT IT IN HERE*)  **********
-          // That should do it.  Give it a try!             **********
+          cell.stemCount = randomNumberPicker(5,10);
         }
       }
       // Check to see if a stem timer is running
@@ -83,9 +54,61 @@ function updateGrid(grid, dt) {
           // (if we're not already at the top of the screen)
           if (y > 0) {
             let cellUp = grid[x][y-1];
+
+            // Here is where we're about to add a new stem  **********
+            // block.                                       **********
+            // How could we check to see if this is the     **********
+            // last stem block to be added?  The last one   **********
+            // will have a stemCount of 1, right?           **********
+            // Add an if statement to check "if the new     **********
+            // stem block would be the last one".  Then     **********
+            // inside that we want to place the first       **********
+            // flower block instead.                        **********
+
+            // Inside the if statement set a flowerTimer    **********
+            // and a flowerCount.                           **********
+
+            // Then you can put these lines in the "else"   **********
+            // block of that if statement.                  **********
             cellUp.stemTimer = 0.5;
             cellUp.stemCount = cell.stemCount - 1;
+
           }
+        }
+      }
+
+      // Now we need to check flowerTimer and flowerCount   **********
+      // (similar to how we checked stemTimer and stemCount **********
+      // above).  Replace "false" below with the condition  **********
+      // to check if cell is a flower block that we need to **********
+      // update.                                            **********
+      if (false) {
+        // Decrement the flower timer.                      **********
+
+        // If the flower timer expired (again replace the   **********
+        // false with the correct condition).               **********
+        if (false) {
+          // If the cell above this one is still inside the **********
+          // grid, set the flowerTimer and flowerCount      **********
+          // (remember we want flowerCount to be one less   **********
+          // in the new block).                             **********
+
+          // If the cell to the left of this one is still   **********
+          // inside the grid, set the flowerTimer and       **********
+          // flowerCount.  (Hint: the cell to the left is   **********
+          // grid[x-1][y])                                  **********
+
+          // If the cell to the right of this one is still  **********
+          // inside the grid, set the flowerTimer and       **********
+          // flowerCount.  (Hint: how do you check to see   **********
+          // if "x+1" is still inside the grid?  Remember   **********
+          // how to get the length of the grid?             **********
+
+          // If the cell below this one is still inside the **********
+          // grid, set the flowerTimer and flowerCount.     **********
+          // Hint: If the cell above this one is            **********
+          // grid[x][y-1], then what do you think the cell  **********
+          // _below_ this one is?                           **********
         }
       }
     }
@@ -97,9 +120,13 @@ function drawGrid(grid, ctx) {
     for (let y = 0; y < grid[x].length; y++) {
       let cell = grid[x][y];
 
-      // Check for stems and seeds first so that those will
-      // draw over grass and sky.
-      if(cell.stemCount > 0) {
+      // Check for flowers first, then stems, seeds and
+      // grass and sky last.
+      // Check if we should draw this as a flower.          **********
+      if (false) {
+        // Set the fillStyle to some flower color and draw  **********
+        // the rectangle.                                   **********
+      } else if (cell.stemCount > 0) {
         ctx.fillStyle = '#41dc82';
         ctx.fillRect(x * 10, y * 10, 10, 10);
       } else if (cell.seedTimer > 0) {
