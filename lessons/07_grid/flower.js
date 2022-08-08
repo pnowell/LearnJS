@@ -1,8 +1,6 @@
 export { initGrid, updateGrid, drawGrid, onMouseDown, onMouseDrag, onMouseUp };
 
 // ******************************************************************
-// Today we're adding a new phase to the plant growth.  Once the stem
-// finishes growing, we'll start a flower at that spot.
 // ******************************************************************
 
 function initGrid(grid) {
@@ -14,8 +12,8 @@ function initGrid(grid) {
       cell.seedTimer = -1;
       cell.stemTimer = -1;
       cell.stemCount = 0;
-      // Add a flowerTimer (set to -1) and                  **********
-      // a flowerCount (set to 0)                           **********
+      cell.flowerTimer = -1;
+      cell.flowerCount = 0;
       if (y <= grid[x].length / 2) {
         cell.sky = true;
       } else {
@@ -42,7 +40,7 @@ function updateGrid(grid, dt) {
         if (cell.seedTimer <= 0) {
           // Start a stem growing at this cell
           cell.stemTimer = 0.5;
-          cell.stemCount = randomNumberPicker(5,10);
+          cell.stemCount = randomNumberPicker(10,15);
         }
       }
       // Check to see if a stem timer is running
@@ -56,63 +54,46 @@ function updateGrid(grid, dt) {
           // (if we're not already at the top of the screen)
           if (y > 0) {
             let cellUp = grid[x][y-1];
-
-            // Here is where we're about to add a new stem  **********
-            // block.                                       **********
-            // How could we check to see if this is the     **********
-            // last stem block to be added?  The last one   **********
-            // will have a stemCount of 1, right?           **********
-            // Add an if statement to check "if the new     **********
-            // stem block would be the last one".  Then     **********
-            // inside that we want to place the first       **********
-            // flower block instead.                        **********
-
-            // Inside the if statement set a flowerTimer    **********
-            // and a flowerCount.                           **********
-            // Remember to set flowerCount to a random      **********
-            // number in some range (for example 2 to 5).   **********
-
-            // Then you can put these lines in the "else"   **********
-            // block of that if statement.                  **********
-            cellUp.stemTimer = 0.5;
-            cellUp.stemCount = cell.stemCount - 1;
-
+            if(cell.stemCount == 2) {
+              cellUp.flowerTimer = 1
+              cellUp.flowerCount = randomNumberPicker(3,5);
+            } else {
+              cellUp.stemTimer = 0.5;
+              cellUp.stemCount = cell.stemCount - 1;
+            }
           }
         }
       }
 
-      // Now we need to check flowerTimer and flowerCount   **********
-      // (similar to how we checked stemTimer and stemCount **********
-      // above).  Replace "false" below with the condition  **********
-      // to check if cell is a flower block that we need to **********
-      // update.                                            **********
-      if (false) {
-        // Decrement the flower timer.                      **********
-
-        // If the flower timer expired (again replace the   **********
-        // false with the correct condition).               **********
-        if (false) {
-          // If the cell above this one is still inside the **********
-          // grid, set the flowerTimer and flowerCount      **********
-          // (remember we want flowerCount to be one less   **********
-          // in the new block).                             **********
-
-          // If the cell to the left of this one is still   **********
-          // inside the grid, set the flowerTimer and       **********
-          // flowerCount.  (Hint: the cell to the left is   **********
-          // grid[x-1][y])                                  **********
-
-          // If the cell to the right of this one is still  **********
-          // inside the grid, set the flowerTimer and       **********
-          // flowerCount.  (Hint: how do you check to see   **********
-          // if "x+1" is still inside the grid?  Remember   **********
-          // how to get the length of the grid?             **********
-
-          // If the cell below this one is still inside the **********
-          // grid, set the flowerTimer and flowerCount.     **********
-          // Hint: If the cell above this one is            **********
-          // grid[x][y-1], then what do you think the cell  **********
-          // _below_ this one is?                           **********
+      // Check to see if a flower timer is running
+      if(cell.flowerTimer > 0 && cell.flowerCount > 1) {
+        cell.flowerTimer -= dt;
+        // Decrement the flower timer.
+        if (cell.flowerTimer <= 0) {
+          // Expand up (if there's room in the grid)
+          if (y > 0) {
+            let cellUp = grid[x][y-1];
+            cellUp.flowerTimer = 0.5;
+            cellUp.flowerCount = cell.flowerCount - 1;
+          }
+          // Expand left
+          if (x > 0) {
+            let cellLeft = grid[x-1][y];
+            cellLeft.flowerTimer = 0.5;
+            cellLeft.flowerCount = cell.flowerCount - 1;
+          }
+          // Expand right
+          if (x+1 < grid.length) {
+            let cellRight = grid[x+1][y];
+            cellRight.flowerTimer = 0.5;
+            cellRight.flowerCount = cell.flowerCount - 1;
+          }
+          // Expand down
+          if (y+1 < grid[x].length) {
+            let cellDown = grid[x][y+1];
+            cellDown.flowerTimer = 0.5;
+            cellDown.flowerCount = cell.flowerCount - 1;
+          }
         }
       }
     }
@@ -126,10 +107,9 @@ function drawGrid(grid, ctx) {
 
       // Check for flowers first, then stems, seeds and
       // grass and sky last.
-      // Check if we should draw this as a flower.          **********
-      if (false) {
-        // Set the fillStyle to some flower color and draw  **********
-        // the rectangle.                                   **********
+      if (cell.flowerCount > 0) {
+        ctx.fillStyle = '#d20430';
+        ctx.fillRect(x * 10, y * 10, 10, 10);
       } else if (cell.stemCount > 0) {
         ctx.fillStyle = '#41dc82';
         ctx.fillRect(x * 10, y * 10, 10, 10);
