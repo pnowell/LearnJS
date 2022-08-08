@@ -7,6 +7,7 @@ const fontFamily = 'KanjiFont';
 let canvas;
 let ctx;
 let fontReady = false;
+let dbIndex = 0;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
@@ -40,7 +41,7 @@ function onUpdate(dt) {
   ctx.clearOptimized();
   let fontSize = 10;
   ctx.font = getFont(fontSize);
-  let kanji = db[4].kanji;
+  let kanji = db[dbIndex].kanji;
   let measure = ctx.measureText(kanji);
   console.dir(measure);
   let maxDim = Math.max(
@@ -60,6 +61,7 @@ function getFont(fontSize) {
 }
 
 function onMouseDown(e) {
+  dbIndex = (dbIndex + 1) % db.length;
 }
 
 function onMouseMove(e) {
