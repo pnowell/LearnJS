@@ -1,7 +1,7 @@
+import { randomIntInRange } from '/LearnJS/common/utils.js';
+
 export { initGrid, updateGrid, drawGrid, onMouseDown, onMouseDrag, onMouseUp };
 
-// ******************************************************************
-// ******************************************************************
 
 function initGrid(grid) {
   for (let x = 0; x < grid.length; x++) {
@@ -23,8 +23,8 @@ function initGrid(grid) {
   }
 }
 
-function randomNumberPicker(low, high) {
-  return Math.floor(low + Math.random() * (high - low));
+function randomIntInRange(low, high) {
+  return Math.floor(low + Math.random() * (high + 0.999 - low));
 }
 
 function updateGrid(grid, dt) {
@@ -40,7 +40,7 @@ function updateGrid(grid, dt) {
         if (cell.seedTimer <= 0) {
           // Start a stem growing at this cell
           cell.stemTimer = 0.5;
-          cell.stemCount = randomNumberPicker(10,15);
+          cell.stemCount = randomIntInRange(10,15);
         }
       }
       // Check to see if a stem timer is running
@@ -56,7 +56,7 @@ function updateGrid(grid, dt) {
             let cellUp = grid[x][y-1];
             if(cell.stemCount == 2) {
               cellUp.flowerTimer = 1
-              cellUp.flowerCount = randomNumberPicker(3,5);
+              cellUp.flowerCount = randomIntInRange(3,5);
             } else {
               cellUp.stemTimer = 0.5;
               cellUp.stemCount = cell.stemCount - 1;

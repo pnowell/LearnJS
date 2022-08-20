@@ -10,18 +10,24 @@
     <div class="container">
       <canvas id="canvas" width="400" height="400"></canvas>
       <div class="inputs">
-        <button type="button" id="resetButton">Reset</button>
-        <button type="button" id="runToggle">Run</button>
-        <button type="button" id="stepButton">Update Once</button>
-        <label for="moduleSelect">Choose a Module</label>
-        <select id="moduleSelect">
-          <option value="flower.js">Flower</option>
-          <option value="life.js">Conway's Game of Life</option>
-          <option value="waves.js">Waves</option>
-          <option value="template.js">Empty Template</option>
-        </select>
-        <label for="updateSpeedSlider">Update Speed</label>
-        <input type="range" id="updateSpeedSlider" min="1" max="100" value="50"/>
+        <div class="level-select-group">
+          <label for="levelSelect" class="level-select-label">Kanji Level</label>
+          <select id="levelSelect" class="level-select">
+            <option value="data_1.js">１年生</option>
+            <option value="data_2.js">２年生</option>
+            <option value="data_3.js">３年生</option>
+            <option value="data_4.js">４年生</option>
+          </select>
+          <label for="componentSelect" class="comp-select-label">Review</label>
+          <select id="componentSelect" class="component">
+            <option value="meaning">Meaning</option>
+            <option value="onYomi">音読み</option>
+            <option value="kunYomi">訓読み</option>
+          </select>
+        </div>
+        <div class="input-spacer"></div>
+        <div id="answers" class="answer-group">
+        </div>
       </div>
     </div>
 

@@ -21,23 +21,45 @@ body {
   padding: 32px;
   display: flex;
   flex-direction: row;
+  align-items: baseline;
   flex: 0 0 100px;
 }
 
-button {
-  margin: 12px;
+.level-select-group {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 100px;
 }
 
-label {
-  margin-top: 12px;
+.level-select-label {
+  margin-bottom: 5px;
 }
 
-select {
+.level-select {
   margin-bottom: 12px;
 }
 
-input {
-  margin-bottom: 12px;
+.input-spacer {
+  flex: 0 0 60px;
+}
+
+.answer-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.answer {
+  margin: 10px 5px;
+  padding: 15px;
+}
+
+.incorrect-answer {
+  background: #f08e91;
+}
+
+.correct-answer {
+  background: #8bee9f;
 }
 
 #canvas {
