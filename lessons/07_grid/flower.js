@@ -23,10 +23,6 @@ function initGrid(grid) {
   }
 }
 
-function randomIntInRange(low, high) {
-  return Math.floor(low + Math.random() * (high + 0.999 - low));
-}
-
 function updateGrid(grid, dt) {
   for (let x = 0; x < grid.length; x++) {
     for (let y = 0; y < grid[x].length; y++) {
