@@ -206,7 +206,7 @@ function initGeometry() {
       let hole = new THREE.Mesh(holeGeometry, holeMaterial);
       let x = spiralCurrRadius * Math.cos(spiralCurrAngle);
       let y = spiralCurrRadius * Math.sin(spiralCurrAngle);
-      x = x / potteryRadius + spiralXOffset;
+      x = x / potteryRadius - spiralXOffset;
       y += potteryHeight * (0.5 + spiralYOffset);
       if (-Math.PI * 0.9 < x
           && x < Math.PI * 0.9
