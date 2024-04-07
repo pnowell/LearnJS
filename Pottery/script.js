@@ -3,15 +3,23 @@ import { onDocReady, animationLoopWrapper, diagonalToVerticalFov, toDeg, toRad }
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js?module'
 
-let renderer, canvas, scene, camera, controls;
-let potteryHeight, potteryRadius, potteryThickness;
+let renderer, renderer2d, canvas, canvas2d, scene, scene2d, camera, camera2d, controls;
+let potteryHeight, potteryRadius, potteryThickness, patternWidth;
 let numSpirals, numPoints, spiralSize, spiralArcAngle, spiralXOffset, spiralYOffset;
 let param = 0;
 let pottery = null;
+let pattern = null;
 const dfov = 40.0;
+const paperWidth = 27.94;
+const paperHeight = 21.59;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas2d = document.getElementById('canvas2d');
+  canvas2d.style.width = "100%";
+  canvas2d.style.height = "100%";
 
   document.getElementById('savePatternButton')
     .addEventListener('click', savePattern);
@@ -21,13 +29,17 @@ onDocReady(function() {
   heightInput.addEventListener('input', e => {
     potteryHeight = parseFloat(e.target.value);
     controls.target = new THREE.Vector3(0, potteryHeight / 2, 0);
+    updateCamera2D(false);
     initGeometry();
   });
 
   let radiusInput = document.getElementById('radiusSlider');
   potteryRadius = parseFloat(radiusInput.value);
+  patternWidth = potteryRadius * Math.PI * 2;
   radiusInput.addEventListener('input', e => {
     potteryRadius = parseFloat(e.target.value);
+    patternWidth = potteryRadius * Math.PI * 2;
+    updateCamera2D(false);
     initGeometry();
   });
 
@@ -80,7 +92,7 @@ onDocReady(function() {
     initGeometry();
   });
 
-  camera = new THREE.PerspectiveCamera(10, 1, 0.1, 50 );
+  camera = new THREE.PerspectiveCamera(10, 1, 0.1, 50);
   camera.position.set(10, 10, 10);
   camera.lookAt(0, 0, 0);
 
@@ -104,31 +116,74 @@ onDocReady(function() {
   scene.add(dirLight);
   scene.add(dirLight.target);
 
-  initGeometry();
+  camera2d = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 50);
+  camera2d.position.set(0, 0, -10);
+  camera2d.lookAt(0, 0, 0);
+  
+  renderer2d = new THREE.WebGLRenderer({canvas: canvas2d});
+  renderer2d.setPixelRatio(window.devicePixelRatio);
 
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-  let resizeObserver = new ResizeObserver(() => updateAspectAndFov(true));
+  scene2d = new THREE.Scene();
+  scene2d.background = new THREE.Color(0xffffff);
+  scene2d.add(new THREE.AmbientLight(0xffffff, 1));
+
+  let resizeObserver = new ResizeObserver(() => updateCameras(true));
   resizeObserver.observe(canvas);
-  updateAspectAndFov(true);
+  updateCameras(true);
+
+  initGeometry();
 
   canvas.addEventListener("mousedown", onMouseDown);
   canvas.addEventListener("mousemove", onMouseMove);
   canvas.addEventListener("mouseup", onMouseUp);
 });
 
-function updateAspectAndFov(setRendererSize) {
+function updateCameras(setRenderSize) {
+  updateCamera3D(setRenderSize);
+  updateCamera2D(setRenderSize);
+}
+
+function updateCamera3D(setRendererSize) {
   // look up the size the canvas is being displayed
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
+  const canvasWidth = canvas.clientWidth;
+  const canvasHeight = canvas.clientHeight;
 
   // you must pass false here or three.js sadly fights the browser
   if (setRendererSize) {
-    renderer.setSize(width, height, false);
+    renderer.setSize(canvasWidth, canvasHeight, false);
   }
-  camera.aspect = width / height;
+  camera.aspect = canvasWidth / canvasHeight;
   camera.fov = toDeg(diagonalToVerticalFov(toRad(dfov), camera.aspect));
   camera.updateProjectionMatrix();
+}
+
+function updateCamera2D(setRendererSize) {
+  const canvasWidth = canvas2d.clientWidth;
+  const canvasHeight = canvas2d.clientHeight;
+
+  if (setRendererSize) {
+    renderer2d.setSize(canvasWidth, canvasHeight, false);
+  }
+
+  let canvasAspect = canvasWidth / canvasHeight;
+  let patternAspect = patternWidth / potteryHeight;
+
+  let camWidth = patternWidth;
+  let camHeight = potteryHeight;
+
+  if (canvasAspect < patternAspect) {
+    camHeight = camWidth / canvasAspect;
+  } else {
+    camWidth = camHeight * canvasAspect;
+  }
+
+  camera2d.position.set(camWidth / 2, camHeight / 2, -10);
+  camera2d.lookAt(camWidth / 2, camHeight / 2, 0);
+  camera2d.left = 0;
+  camera2d.right = camWidth;
+  camera2d.bottom = -camHeight / 2;
+  camera2d.top = camHeight / 2;
+  camera2d.updateProjectionMatrix();
 }
 
 let mouseIsDown = false;
@@ -147,12 +202,17 @@ function onMouseUp(e) {
 function animation(dt) {
   controls.update();
   renderer.render(scene, camera);
+  renderer2d.render(scene2d, camera2d);
 }
 
 function initGeometry() {
   if (pottery) {
     pottery.removeFromParent();
     pottery = null;
+  }
+  if (pattern) {
+    pattern.removeFromParent();
+    pattern = null;
   }
 
   const points = [];
@@ -172,6 +232,9 @@ function initGeometry() {
   pottery = new THREE.Mesh(geometry, material);
   scene.add(pottery);
 
+  pattern = new THREE.Group();
+  scene2d.add(pattern);
+
   const holeGeometry = new THREE.CylinderGeometry(
     /* radiusTop= */ 0.05,
     /* radiusBottom= */ 0.05,
@@ -185,7 +248,6 @@ function initGeometry() {
   });
 
   let spiralRadius = potteryHeight * 0.45 * spiralSize;
-  let midRadius = potteryRadius - potteryThickness / 2;
   // Create all the holes
   for (let spiral = 0; spiral < numSpirals; spiral++) {
     let spiralStartAngle = 2 * Math.PI * spiral / numSpirals;
@@ -193,32 +255,43 @@ function initGeometry() {
       let param = point / numPoints;
       let spiralCurrRadius = spiralRadius * param;
       let spiralCurrAngle = spiralStartAngle + spiralArcAngle * param;
-      let hole = new THREE.Mesh(holeGeometry, holeMaterial);
       let x = spiralCurrRadius * Math.cos(spiralCurrAngle);
       let y = spiralCurrRadius * Math.sin(spiralCurrAngle);
-      x = x / potteryRadius - spiralXOffset;
+      x -= patternWidth * spiralXOffset;
       y += potteryHeight * (0.5 + spiralYOffset);
-      if (-Math.PI * 0.9 < x
-          && x < Math.PI * 0.9
+      if (-patternWidth * 0.45 < x
+          && x < patternWidth * 0.45
           && potteryThickness < y
           && y < potteryHeight - potteryThickness) {
-        hole.position.set(
-          Math.cos(x) * midRadius,
-          y,
-          Math.sin(x) * midRadius
-        );
-        hole.rotateOnAxis(
-          new THREE.Vector3(
-            Math.sin(x),
-            0.0,
-            -Math.cos(x)
-          ),
-          Math.PI / 2
-        );
-        pottery.add(hole);
+        addInstance(holeGeometry, holeMaterial, x, y);
       }
     }
   }
+}
+
+function addInstance(geometry, material, x, y) {
+  let midRadius = potteryRadius - potteryThickness / 2;
+  let mesh = new THREE.Mesh(geometry, material);
+  const angle = x * 2 * Math.PI / patternWidth;
+  mesh.position.set(
+    Math.cos(angle) * midRadius,
+    y,
+    Math.sin(angle) * midRadius
+  );
+  mesh.rotateOnAxis(
+    new THREE.Vector3(
+      Math.sin(angle),
+      0.0,
+      -Math.cos(angle)
+    ),
+    Math.PI / 2
+  );
+  pottery.add(mesh);
+
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, 0.0);
+  mesh.rotateOnAxis(new THREE.Vector3(1.0, 0.0, 0.0), Math.PI / 2);
+  pattern.add(mesh);
 }
 
 function savePattern() {

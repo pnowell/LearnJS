@@ -27,14 +27,17 @@
             <label for="spiralArcAngle">Spiral Arc Angle</label>
             <input type="range" id="spiralArcAngleSlider" min="-9.42" max="9.42" value="4.71" step="any"/>
             <label for="spiralXOffset">Horizontal Offset</label>
-            <input type="range" id="spiralXOffsetSlider" min="-9.42" max="9.42" value="0.0" step="any"/>
+            <input type="range" id="spiralXOffsetSlider" min="-1.0" max="1.0" value="0.0" step="any"/>
             <label for="spiralYOffset">Vertical Offset</label>
             <input type="range" id="spiralYOffsetSlider" min="-1.0" max="1.0" value="0.0" step="any"/>
           </div>
         </div>
       </div>
       <div class="canvas-wrapper">
-        <canvas id="canvas" width="100%" height="100%"></canvas>
+        <canvas id="canvas" />
+      </div>
+      <div class="canvas-2d-wrapper">
+        <canvas id="canvas2d" />
       </div>
     </div>
 

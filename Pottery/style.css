@@ -35,12 +35,22 @@ body {
 }
 
 .canvas-wrapper {
-  flex: 1 1 auto;
+  flex: 1 1 25%;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+.canvas-2d-wrapper {
+  flex: 1 1 75%;
   align-self: stretch;
   overflow: hidden;
 }
 
 #canvas {
+  display: block;
+}
+
+#canvas2d {
   display: block;
 }
 
