@@ -17,9 +17,19 @@ body {
   align-items: center;
 }
 
+.content-wrapper {
+  display: flex;
+  flex: 0 0 150px;
+}
+
+.overflow-container {
+  flex: 1;
+  height: 100vh;
+  overflow: auto;
+}
+
 .inputs {
   padding: 32px;
-  flex: 0 0 150px;
   display: flex;
   flex-direction: column;
 }
@@ -32,4 +42,8 @@ body {
 
 #canvas {
   display: block;
+}
+
+button, input {
+  margin-bottom: 15px;
 }

@@ -3,27 +3,18 @@ import { onDocReady, animationLoopWrapper, diagonalToVerticalFov, toDeg, toRad }
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js?module'
 
-let renderer, canvas, scene, camera, dfov, controls;
+let renderer, canvas, scene, camera, controls;
 let potteryHeight, potteryRadius, potteryThickness;
 let numSpirals, numPoints, spiralSize, spiralArcAngle, spiralXOffset, spiralYOffset;
 let param = 0;
 let pottery = null;
-const separation = 0.5;
-const amplitude = 1;
-const xWavelength = 5;
-const zWavelength = 7;
-const xCyclesPerSecond = 3;
-const zCyclesPerSecond = 4;
+const dfov = 40.0;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
 
-  let fovInput = document.getElementById('fov');
-  dfov = parseFloat(fovInput.value);
-  fovInput.addEventListener('input', e => {
-    dfov = parseFloat(e.target.value);
-    updateAspectAndFov(false);
-  });
+  document.getElementById('savePatternButton')
+    .addEventListener('click', savePattern);
 
   let heightInput = document.getElementById('heightSlider');
   potteryHeight = parseFloat(heightInput.value);
@@ -155,7 +146,6 @@ function onMouseUp(e) {
 // animation
 function animation(dt) {
   controls.update();
-  updateGeometry(dt);
   renderer.render(scene, camera);
 }
 
@@ -231,5 +221,6 @@ function initGeometry() {
   }
 }
 
-function updateGeometry(dt) {
+function savePattern() {
+  alert('Saving pattern...');
 }
