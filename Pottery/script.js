@@ -168,11 +168,14 @@ function updateCamera2D(setRendererSize) {
     renderer2d.setSize(canvasWidth, canvasHeight, false);
   }
 
-  let canvasAspect = canvasWidth / canvasHeight;
-  let patternAspect = patternWidth / potteryHeight;
+  let boundWidth = Math.max(patternWidth, paperWidth) + 0.5;
+  let boundHeight = Math.max(potteryHeight, paperHeight) + 0.5;
 
-  let camWidth = patternWidth;
-  let camHeight = potteryHeight;
+  let canvasAspect = canvasWidth / canvasHeight;
+  let patternAspect = boundWidth / boundHeight;
+
+  let camWidth = boundWidth;
+  let camHeight = boundHeight;
 
   if (canvasAspect < patternAspect) {
     camHeight = camWidth / canvasAspect;
@@ -230,19 +233,41 @@ function createPottery() {
   return new THREE.Mesh(geometry, material);
 }
 
-function createPattern() {
-  const material = new THREE.LineBasicMaterial({color: 0x0000ff});
+function createRectModel(x, y, width, height, color) {
+  const material = new THREE.LineBasicMaterial({color: color});
 
   const points = [];
-  points.push(new THREE.Vector3(-patternWidth / 2, -potteryHeight / 2, 0));
-  points.push(new THREE.Vector3(patternWidth / 2, -potteryHeight / 2, 0));
-  points.push(new THREE.Vector3(patternWidth / 2, potteryHeight / 2, 0));
-  points.push(new THREE.Vector3(-patternWidth / 2, potteryHeight / 2, 0));
-  points.push(new THREE.Vector3(-patternWidth / 2, -potteryHeight / 2, 0));
+  points.push(new THREE.Vector3(x, y, 0));
+  points.push(new THREE.Vector3(x + width, y, 0));
+  points.push(new THREE.Vector3(x + width, y + height, 0));
+  points.push(new THREE.Vector3(x, y + height, 0));
+  points.push(new THREE.Vector3(x, y, 0));
 
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
   return new THREE.Line(geometry, material);
+}
+
+function createPattern() {
+  let patternModel = createRectModel(
+    -patternWidth / 2,
+    -potteryHeight / 2,
+    patternWidth,
+    potteryHeight,
+    0x0000ff
+  );
+
+  patternModel.add(
+    createRectModel(
+      -paperWidth / 2,
+      -paperHeight / 2,
+      paperWidth,
+      paperHeight,
+      0xff0000
+    )
+  );
+
+  return patternModel;
 }
 
 function addInstance(geometry, material, x, y) {
