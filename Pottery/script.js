@@ -5,16 +5,17 @@ import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/Orb
 
 let renderer, renderer2d, canvas, canvas2d, scene, scene2d, camera, camera2d, controls;
 let potteryHeight, potteryRadius, potteryThickness, patternWidth;
-let numSpirals, numPoints, spiralSize, spiralArcAngle, spiralXOffset, spiralYOffset;
+let numSpirals, numPointsS, numPointsM, numPointsL;
+let spiralSize, spiralArcAngle, spiralRotation, spiralXOffset, spiralYOffset;
 let param = 0;
 let pottery = null;
 let pattern = null;
 const dfov = 40.0;
 const paperWidth = 27.94;
 const paperHeight = 21.59;
-const holeRadiusL = 0.35;
-const holeRadiusM = 0.25;
-const holeRadiusS = 0.2;
+const holeRadiusL = 0.5;
+const holeRadiusM = 0.35;
+const holeRadiusS = 0.25;
 
 onDocReady(function() {
   canvas = document.getElementById('canvas');
@@ -60,10 +61,24 @@ onDocReady(function() {
     initGeometry();
   });
 
-  let numPointsInput = document.getElementById('numPointsSlider');
-  numPoints = parseInt(numPointsInput.value);
-  numPointsInput.addEventListener('input', e => {
-    numPoints = parseInt(e.target.value);
+  let numPointsSmallInput = document.getElementById('smallPointsSlider');
+  numPointsS = parseInt(numPointsSmallInput.value);
+  numPointsSmallInput.addEventListener('input', e => {
+    numPointsS = parseInt(e.target.value);
+    initGeometry();
+  });
+
+  let numPointsMediumInput = document.getElementById('mediumPointsSlider');
+  numPointsM = parseInt(numPointsMediumInput.value);
+  numPointsMediumInput.addEventListener('input', e => {
+    numPointsM = parseInt(e.target.value);
+    initGeometry();
+  });
+
+  let numPointsLargeInput = document.getElementById('largePointsSlider');
+  numPointsL = parseInt(numPointsLargeInput.value);
+  numPointsLargeInput.addEventListener('input', e => {
+    numPointsL = parseInt(e.target.value);
     initGeometry();
   });
 
@@ -78,6 +93,13 @@ onDocReady(function() {
   spiralArcAngle = parseFloat(spiralArcAngleInput.value);
   spiralArcAngleInput.addEventListener('input', e => {
     spiralArcAngle = parseFloat(e.target.value);
+    initGeometry();
+  });
+
+  let spiralRotationInput = document.getElementById('spiralRotationSlider');
+  spiralRotation = parseFloat(spiralRotationInput.value);
+  spiralRotationInput.addEventListener('input', e => {
+    spiralRotation = parseFloat(e.target.value);
     initGeometry();
   });
 
@@ -320,9 +342,23 @@ function initGeometry() {
   pattern = createPattern();
   scene2d.add(pattern);
 
-  const holeGeometry = new THREE.CylinderGeometry(
+  const holeGeometryS = new THREE.CylinderGeometry(
+    /* radiusTop= */ holeRadiusS,
+    /* radiusBottom= */ holeRadiusS,
+    /* height= */ potteryThickness * 1.1,
+    /* radialSegments= */ 15,
+    /* heightSegments= */ 1
+  );
+  const holeGeometryM = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusM,
     /* radiusBottom= */ holeRadiusM,
+    /* height= */ potteryThickness * 1.1,
+    /* radialSegments= */ 15,
+    /* heightSegments= */ 1
+  );
+  const holeGeometryL = new THREE.CylinderGeometry(
+    /* radiusTop= */ holeRadiusL,
+    /* radiusBottom= */ holeRadiusL,
     /* height= */ potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
@@ -332,19 +368,36 @@ function initGeometry() {
     flatShading: true,
   });
 
+  let startHoleRadius = 0.0;
+  if (numPointsS > 0) {
+    startHoleRadius = holeRadiusS;
+  } else if (numPointsM > 0) {
+    startHoleRadius = holeRadiusM;
+  } else if (numPointsL > 0) {
+    startHoleRadius = holeRadiusL;
+  }
+
+  let spiralStartRadius = numSpirals * startHoleRadius * 2.0 / Math.PI;
   let spiralRadius = potteryHeight * 0.45 * spiralSize;
+  const numPoints = numPointsS + numPointsM + numPointsL;
   // Create all the holes
   for (let spiral = 0; spiral < numSpirals; spiral++) {
-    let spiralStartAngle = 2 * Math.PI * spiral / numSpirals;
+    let spiralStartAngle = 2 * Math.PI * spiral / numSpirals + spiralRotation;
     for (let point = 0; point < numPoints; point++) {
       let param = point / numPoints;
-      let spiralCurrRadius = spiralRadius * param;
+      let spiralCurrRadius = spiralStartRadius * (1 - param) + spiralRadius * param;
       let spiralCurrAngle = spiralStartAngle + spiralArcAngle * param;
       let x = spiralCurrRadius * Math.cos(spiralCurrAngle);
       let y = spiralCurrRadius * Math.sin(spiralCurrAngle);
       x -= patternWidth * spiralXOffset;
       y += potteryHeight * spiralYOffset;
-      addInstance(holeGeometry, holeMaterial, x, y);
+      if (point < numPointsS) {
+        addInstance(holeGeometryS, holeMaterial, x, y);
+      } else if (point < numPointsS + numPointsM) {
+        addInstance(holeGeometryM, holeMaterial, x, y);
+      } else {
+        addInstance(holeGeometryL, holeMaterial, x, y);
+      }
     }
   }
 }
