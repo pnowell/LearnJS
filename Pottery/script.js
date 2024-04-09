@@ -1,13 +1,11 @@
 import { onDocReady, animationLoopWrapper, diagonalToVerticalFov, toDeg, toRad } from '/LearnJS/common/common.js';
+import { TweakConfig, Tweaks } from '/LearnJS/common/tweaks.js';
 
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js?module'
 
 let renderer, renderer2d, canvas, canvas2d, scene, scene2d, camera, camera2d, controls;
-let potteryHeight, potteryRadius, potteryThickness, patternWidth;
-let numSpirals, numPointsS, numPointsM, numPointsL;
-let spiralSize, spiralArcAngle, spiralRotation, spiralXOffset, spiralYOffset;
-let param = 0;
+let tweaks;
 let pottery = null;
 let pattern = null;
 const dfov = 40.0;
@@ -28,94 +26,32 @@ onDocReady(function() {
   document.getElementById('savePatternButton')
     .addEventListener('click', savePattern);
 
-  let heightInput = document.getElementById('heightSlider');
-  potteryHeight = parseFloat(heightInput.value);
-  heightInput.addEventListener('input', e => {
-    potteryHeight = parseFloat(e.target.value);
-    controls.target = new THREE.Vector3(0, potteryHeight / 2, 0);
-    updateCamera2D(false);
-    initGeometry();
-  });
-
-  let radiusInput = document.getElementById('radiusSlider');
-  potteryRadius = parseFloat(radiusInput.value);
-  patternWidth = potteryRadius * Math.PI * 2;
-  radiusInput.addEventListener('input', e => {
-    potteryRadius = parseFloat(e.target.value);
-    patternWidth = potteryRadius * Math.PI * 2;
-    updateCamera2D(false);
-    initGeometry();
-  });
-
-  let thicknessInput = document.getElementById('thicknessSlider');
-  potteryThickness = parseFloat(thicknessInput.value);
-  thicknessInput.addEventListener('input', e => {
-    potteryThickness = parseFloat(e.target.value);
-    initGeometry();
-  });
-
-  let numSpiralsInput = document.getElementById('numSpiralsSlider');
-  numSpirals = parseInt(numSpiralsInput.value);
-  numSpiralsInput.addEventListener('input', e => {
-    numSpirals = parseInt(e.target.value);
-    initGeometry();
-  });
-
-  let numPointsSmallInput = document.getElementById('smallPointsSlider');
-  numPointsS = parseInt(numPointsSmallInput.value);
-  numPointsSmallInput.addEventListener('input', e => {
-    numPointsS = parseInt(e.target.value);
-    initGeometry();
-  });
-
-  let numPointsMediumInput = document.getElementById('mediumPointsSlider');
-  numPointsM = parseInt(numPointsMediumInput.value);
-  numPointsMediumInput.addEventListener('input', e => {
-    numPointsM = parseInt(e.target.value);
-    initGeometry();
-  });
-
-  let numPointsLargeInput = document.getElementById('largePointsSlider');
-  numPointsL = parseInt(numPointsLargeInput.value);
-  numPointsLargeInput.addEventListener('input', e => {
-    numPointsL = parseInt(e.target.value);
-    initGeometry();
-  });
-
-  let spiralSizeInput = document.getElementById('spiralSizeSlider');
-  spiralSize = parseFloat(spiralSizeInput.value);
-  spiralSizeInput.addEventListener('input', e => {
-    spiralSize = parseFloat(e.target.value);
-    initGeometry();
-  });
-
-  let spiralArcAngleInput = document.getElementById('spiralArcAngleSlider');
-  spiralArcAngle = parseFloat(spiralArcAngleInput.value);
-  spiralArcAngleInput.addEventListener('input', e => {
-    spiralArcAngle = parseFloat(e.target.value);
-    initGeometry();
-  });
-
-  let spiralRotationInput = document.getElementById('spiralRotationSlider');
-  spiralRotation = parseFloat(spiralRotationInput.value);
-  spiralRotationInput.addEventListener('input', e => {
-    spiralRotation = parseFloat(e.target.value);
-    initGeometry();
-  });
-
-  let spiralXOffsetInput = document.getElementById('spiralXOffsetSlider');
-  spiralXOffset = parseFloat(spiralXOffsetInput.value);
-  spiralXOffsetInput.addEventListener('input', e => {
-    spiralXOffset = parseFloat(e.target.value);
-    initGeometry();
-  });
-
-  let spiralYOffsetInput = document.getElementById('spiralYOffsetSlider');
-  spiralYOffset = parseFloat(spiralYOffsetInput.value);
-  spiralYOffsetInput.addEventListener('input', e => {
-    spiralYOffset = parseFloat(e.target.value);
-    initGeometry();
-  });
+  tweaks = new Tweaks(
+      {
+        'potteryRadius': new TweakConfig('float', (t, isInit) => {
+          t.patternWidth = t.potteryRadius * Math.PI * 2;
+          if (!isInit) {
+            updateCamera2D(false);
+          }
+        }),
+        'potteryHeight': new TweakConfig('float', (t, isInit) => {
+          if (!isInit) {
+            controls.target = new THREE.Vector3(0, t.potteryHeight / 2, 0);
+            updateCamera2D(false);
+          }
+        }),
+        'potteryThickness': new TweakConfig('float'),
+        'numSpirals': new TweakConfig('int'),
+        'numPointsS': new TweakConfig('float'),
+        'numPointsM': new TweakConfig('float'),
+        'numPointsL': new TweakConfig('float'),
+        'spiralSize': new TweakConfig('float'),
+        'spiralArcAngle': new TweakConfig('float'),
+        'spiralRotation': new TweakConfig('float'),
+        'spiralXOffset': new TweakConfig('float'),
+        'spiralYOffset': new TweakConfig('float'),
+      },
+      () => initGeometry());
 
   camera = new THREE.PerspectiveCamera(10, 1, 0.1, 350);
   camera.position.set(70, 70, 70);
@@ -128,7 +64,7 @@ onDocReady(function() {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = 3.5;
   controls.maxDistance = 210;
-  controls.target = new THREE.Vector3(0, potteryHeight / 2, 0);
+  controls.target = new THREE.Vector3(0, tweaks.potteryHeight / 2, 0);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf0f0f0);
@@ -190,8 +126,8 @@ function updateCamera2D(setRendererSize) {
     renderer2d.setSize(canvasWidth, canvasHeight, false);
   }
 
-  let boundWidth = Math.max(patternWidth, paperWidth) + 0.5;
-  let boundHeight = Math.max(potteryHeight, paperHeight) + 0.5;
+  let boundWidth = Math.max(tweaks.patternWidth, paperWidth) + 0.5;
+  let boundHeight = Math.max(tweaks.potteryHeight, paperHeight) + 0.5;
 
   let canvasAspect = canvasWidth / canvasHeight;
   let patternAspect = boundWidth / boundHeight;
@@ -239,14 +175,30 @@ function savePattern() {
 
 function createPottery() {
   const points = [];
-  points.push(new THREE.Vector2(0.0, 0.0));
-  points.push(new THREE.Vector2(potteryRadius - potteryThickness / 2, 0.0));
-  points.push(new THREE.Vector2(potteryRadius, potteryThickness / 2));
-  points.push(new THREE.Vector2(potteryRadius, potteryHeight - potteryThickness / 2));
-  points.push(new THREE.Vector2(potteryRadius - potteryThickness / 2, potteryHeight));
-  points.push(new THREE.Vector2(potteryRadius - potteryThickness, potteryHeight - potteryThickness / 2));
-  points.push(new THREE.Vector2(potteryRadius - potteryThickness, potteryThickness));
-  points.push(new THREE.Vector2(0.0, potteryThickness));
+  points.push(
+    new THREE.Vector2(0.0, 0.0));
+  points.push(
+    new THREE.Vector2(tweaks.potteryRadius - tweaks.potteryThickness / 2, 0.0));
+  points.push(
+    new THREE.Vector2(tweaks.potteryRadius, tweaks.potteryThickness / 2));
+  points.push(
+    new THREE.Vector2(
+      tweaks.potteryRadius,
+      tweaks.potteryHeight - tweaks.potteryThickness / 2));
+  points.push(
+    new THREE.Vector2(
+      tweaks.potteryRadius - tweaks.potteryThickness / 2,
+      tweaks.potteryHeight));
+  points.push(
+    new THREE.Vector2(
+      tweaks.potteryRadius - tweaks.potteryThickness,
+      tweaks.potteryHeight - tweaks.potteryThickness / 2));
+  points.push(
+    new THREE.Vector2(
+      tweaks.potteryRadius - tweaks.potteryThickness,
+      tweaks.potteryThickness));
+  points.push(
+    new THREE.Vector2(0.0, tweaks.potteryThickness));
   const geometry = new THREE.LatheGeometry(points, 30);
   const material = new THREE.MeshPhongMaterial({
     color: 0xccccff,
@@ -272,10 +224,10 @@ function createRectModel(x, y, width, height, color) {
 
 function createPattern() {
   let patternModel = createRectModel(
-    -patternWidth / 2,
-    -potteryHeight / 2,
-    patternWidth,
-    potteryHeight,
+    -tweaks.patternWidth / 2,
+    -tweaks.potteryHeight / 2,
+    tweaks.patternWidth,
+    tweaks.potteryHeight,
     0x0000ff
   );
 
@@ -293,14 +245,14 @@ function createPattern() {
 }
 
 function addInstance(geometry, material, x, y) {
-  let midRadius = potteryRadius - potteryThickness / 2;
-  const angle = x * 2 * Math.PI / patternWidth;
-  let potteryY = y + 0.5 * potteryHeight;
+  let midRadius = tweaks.potteryRadius - tweaks.potteryThickness / 2;
+  const angle = x * 2 * Math.PI / tweaks.patternWidth;
+  let potteryY = y + 0.5 * tweaks.potteryHeight;
 
-  if (x < (-patternWidth / 2 + 0.5)
-      || (patternWidth / 2 - 0.5) < x
-      || potteryY < potteryThickness
-      || potteryHeight - potteryThickness < potteryY) {
+  if (x < (-tweaks.patternWidth / 2 + 0.5)
+      || (tweaks.patternWidth / 2 - 0.5) < x
+      || potteryY < tweaks.potteryThickness
+      || tweaks.potteryHeight - tweaks.potteryThickness < potteryY) {
     return;
   }
 
@@ -345,21 +297,21 @@ function initGeometry() {
   const holeGeometryS = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusS,
     /* radiusBottom= */ holeRadiusS,
-    /* height= */ potteryThickness * 1.1,
+    /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
   const holeGeometryM = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusM,
     /* radiusBottom= */ holeRadiusM,
-    /* height= */ potteryThickness * 1.1,
+    /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
   const holeGeometryL = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusL,
     /* radiusBottom= */ holeRadiusL,
-    /* height= */ potteryThickness * 1.1,
+    /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
@@ -369,31 +321,31 @@ function initGeometry() {
   });
 
   let startHoleRadius = 0.0;
-  if (numPointsS > 0) {
+  if (tweaks.numPointsS > 0) {
     startHoleRadius = holeRadiusS;
-  } else if (numPointsM > 0) {
+  } else if (tweaks.numPointsM > 0) {
     startHoleRadius = holeRadiusM;
-  } else if (numPointsL > 0) {
+  } else if (tweaks.numPointsL > 0) {
     startHoleRadius = holeRadiusL;
   }
 
-  let spiralStartRadius = numSpirals * startHoleRadius * 2.0 / Math.PI;
-  let spiralRadius = potteryHeight * 0.45 * spiralSize;
-  const numPoints = numPointsS + numPointsM + numPointsL;
+  let spiralStartRadius = tweaks.numSpirals * startHoleRadius * 2.0 / Math.PI;
+  let spiralRadius = tweaks.potteryHeight * 0.45 * tweaks.spiralSize;
+  const numPoints = tweaks.numPointsS + tweaks.numPointsM + tweaks.numPointsL;
   // Create all the holes
-  for (let spiral = 0; spiral < numSpirals; spiral++) {
-    let spiralStartAngle = 2 * Math.PI * spiral / numSpirals + spiralRotation;
+  for (let spiral = 0; spiral < tweaks.numSpirals; spiral++) {
+    let spiralStartAngle = 2 * Math.PI * spiral / tweaks.numSpirals + tweaks.spiralRotation;
     for (let point = 0; point < numPoints; point++) {
       let param = point / numPoints;
       let spiralCurrRadius = spiralStartRadius * (1 - param) + spiralRadius * param;
-      let spiralCurrAngle = spiralStartAngle + spiralArcAngle * param;
+      let spiralCurrAngle = spiralStartAngle + tweaks.spiralArcAngle * param;
       let x = spiralCurrRadius * Math.cos(spiralCurrAngle);
       let y = spiralCurrRadius * Math.sin(spiralCurrAngle);
-      x -= patternWidth * spiralXOffset;
-      y += potteryHeight * spiralYOffset;
-      if (point < numPointsS) {
+      x -= tweaks.patternWidth * tweaks.spiralXOffset;
+      y += tweaks.potteryHeight * tweaks.spiralYOffset;
+      if (point < tweaks.numPointsS) {
         addInstance(holeGeometryS, holeMaterial, x, y);
-      } else if (point < numPointsS + numPointsM) {
+      } else if (point < tweaks.numPointsS + tweaks.numPointsM) {
         addInstance(holeGeometryM, holeMaterial, x, y);
       } else {
         addInstance(holeGeometryL, holeMaterial, x, y);
