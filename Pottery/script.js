@@ -249,8 +249,8 @@ function addInstance(geometry, material, x, y) {
   const angle = x * 2 * Math.PI / tweaks.patternWidth;
   let potteryY = y + 0.5 * tweaks.potteryHeight;
 
-  if (x < (-tweaks.patternWidth / 2 + 1.0)
-      || (tweaks.patternWidth / 2 - 1.0) < x
+  if (x < (-tweaks.patternWidth / 2 + 1.5)
+      || (tweaks.patternWidth / 2 - 1.5) < x
       || potteryY < tweaks.potteryThickness
       || tweaks.potteryHeight - tweaks.potteryThickness < potteryY) {
     return;
