@@ -1,5 +1,5 @@
 import { onDocReady, animationLoopWrapper, diagonalToVerticalFov, toDeg, toRad } from '/LearnJS/common/common.js';
-import { TweakConfig, Tweaks } from '/LearnJS/common/tweaks.js';
+import { TweakConfig, Tweaks, OnTweakPanelSelected } from '/LearnJS/common/tweaks.js';
 
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js?module'
@@ -41,6 +41,9 @@ onDocReady(function() {
           }
         }),
         'potteryThickness': new TweakConfig('float'),
+        'patternType': new TweakConfig('select', (t, isInit) => {
+          OnTweakPanelSelected(t.patternType);
+        }),
         'numSpirals': new TweakConfig('int'),
         'numPointsS': new TweakConfig('float'),
         'numPointsM': new TweakConfig('float'),
@@ -294,32 +297,44 @@ function initGeometry() {
   pattern = createPattern();
   scene2d.add(pattern);
 
-  const holeGeometryS = new THREE.CylinderGeometry(
+  let utils = {};
+  utils.holeGeometryS = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusS,
     /* radiusBottom= */ holeRadiusS,
     /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
-  const holeGeometryM = new THREE.CylinderGeometry(
+  utils.holeGeometryM = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusM,
     /* radiusBottom= */ holeRadiusM,
     /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
-  const holeGeometryL = new THREE.CylinderGeometry(
+  utils.holeGeometryL = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusL,
     /* radiusBottom= */ holeRadiusL,
     /* height= */ tweaks.potteryThickness * 1.1,
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
-  const holeMaterial = new THREE.MeshPhongMaterial({
+  utils.holeMaterial = new THREE.MeshPhongMaterial({
     color: 0x000000,
     flatShading: true,
   });
 
+  switch (tweaks.patternType) {
+    case "spirals":
+      initSpiralGeometry(utils);
+      break;
+    case "clover":
+      initCloverGeometry(utils);
+      break;
+  }
+}
+
+function initSpiralGeometry(utils) {
   let startHoleRadius = 0.0;
   if (tweaks.numPointsS > 0) {
     startHoleRadius = holeRadiusS;
@@ -344,12 +359,16 @@ function initGeometry() {
       x -= tweaks.patternWidth * tweaks.spiralXOffset;
       y += tweaks.potteryHeight * tweaks.spiralYOffset;
       if (point < tweaks.numPointsS) {
-        addInstance(holeGeometryS, holeMaterial, x, y);
+        addInstance(utils.holeGeometryS, utils.holeMaterial, x, y);
       } else if (point < tweaks.numPointsS + tweaks.numPointsM) {
-        addInstance(holeGeometryM, holeMaterial, x, y);
+        addInstance(utils.holeGeometryM, utils.holeMaterial, x, y);
       } else {
-        addInstance(holeGeometryL, holeMaterial, x, y);
+        addInstance(utils.holeGeometryL, utils.holeMaterial, x, y);
       }
     }
   }
+}
+
+function initCloverGeometry(utils) {
+  addInstance(utils.holeGeometryL, utils.holeMaterial, 0, 0);
 }

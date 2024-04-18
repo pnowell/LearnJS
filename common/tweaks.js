@@ -1,4 +1,4 @@
-export { TweakConfig, Tweaks };
+export { TweakConfig, Tweaks, OnTweakPanelSelected };
 
 class TweakConfig {
   constructor (inputType = 'float', onChange = null) {
@@ -37,6 +37,23 @@ class Tweaks {
             this[key] = parseInt(inputElem.value);
             urlSearchParams.set(key, this[key].toString());
           }
+        } else if (tweakConfig.inputType == 'select') {
+          let paramInvalid = true;
+          let options = inputElem.options;
+          if (readFromParam) {
+            for (let optIdx = 0; optIdx < options.length; optIdx++) {
+              if (options[optIdx].value === param) {
+                inputElem.selectedIndex = optIdx;
+                this[key] = param;
+                paramInvalid = false;
+                break;
+              }
+            }
+          }
+          if (paramInvalid || !readFromParam) {
+            this[key] = options[inputElem.selectedIndex].value;
+            urlSearchParams.set(key, this[key]);
+          }
         } else {
           if (readFromParam) {
             this[key] = param;
@@ -65,3 +82,16 @@ class Tweaks {
     }
   }
 };
+
+// Utility function for hiding all divs with class "tweak-panel" except for the
+// one with the given name.
+function OnTweakPanelSelected(panelId) {
+  let panels = document.getElementsByClassName("tweak-panel");
+  for (let i = 0; i < panels.length; i++) {
+    if (panels[i].id === panelId) {
+      panels[i].style.removeProperty('display');
+    } else {
+      panels[i].style.display = "none";
+    }
+  }
+}
