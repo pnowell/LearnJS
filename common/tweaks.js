@@ -18,10 +18,9 @@ class Tweaks {
 
       let onChangeWrapper = (isInit) => {
         let param = urlSearchParams.get(key);
-        console.log("key: " + key + " = " + param);
         let readFromParam = isInit && param !== null;
 
-        if (tweakConfig.inputType == 'float') {
+        if (tweakConfig.inputType === 'float') {
           if (readFromParam) {
             this[key] = parseFloat(param);
             inputElem.value = param;
@@ -29,7 +28,7 @@ class Tweaks {
             this[key] = parseFloat(inputElem.value);
             urlSearchParams.set(key, this[key].toFixed(3));
           }
-        } else if (tweakConfig.inputType == 'int') {
+        } else if (tweakConfig.inputType === 'int') {
           if (readFromParam) {
             this[key] = parseInt(param);
             inputElem.value = param;
@@ -37,7 +36,7 @@ class Tweaks {
             this[key] = parseInt(inputElem.value);
             urlSearchParams.set(key, this[key].toString());
           }
-        } else if (tweakConfig.inputType == 'select') {
+        } else if (tweakConfig.inputType === 'select') {
           let paramInvalid = true;
           let options = inputElem.options;
           if (readFromParam) {
@@ -53,6 +52,14 @@ class Tweaks {
           if (paramInvalid || !readFromParam) {
             this[key] = options[inputElem.selectedIndex].value;
             urlSearchParams.set(key, this[key]);
+          }
+        } else if (tweakConfig.inputType === 'checkbox') {
+          if (readFromParam) {
+            this[key] = (param.toLowerCase() === 'true');
+            inputElem.checked = this[key];
+          } else {
+            this[key] = inputElem.checked;
+            urlSearchParams.set(key, this[key].toString());
           }
         } else {
           if (readFromParam) {

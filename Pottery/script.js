@@ -41,9 +41,12 @@ onDocReady(function() {
           }
         }),
         'potteryThickness': new TweakConfig('float'),
+
         'patternType': new TweakConfig('select', (t, isInit) => {
           OnTweakPanelSelected(t.patternType);
         }),
+
+        // Spirals
         'numSpirals': new TweakConfig('int'),
         'numPointsS': new TweakConfig('float'),
         'numPointsM': new TweakConfig('float'),
@@ -53,6 +56,11 @@ onDocReady(function() {
         'spiralRotation': new TweakConfig('float'),
         'spiralXOffset': new TweakConfig('float'),
         'spiralYOffset': new TweakConfig('float'),
+
+        // Clover
+        'cloverLeaves': new TweakConfig('int'),
+        'cloverPoints': new TweakConfig('int'),
+        'cloverReverse': new TweakConfig('checkbox'),
       },
       () => initGeometry());
 
@@ -370,5 +378,27 @@ function initSpiralGeometry(utils) {
 }
 
 function initCloverGeometry(utils) {
-  addInstance(utils.holeGeometryL, utils.holeMaterial, 0, 0);
+  let anglePerLeaf = 2.0 * Math.PI / tweaks.cloverLeaves;
+  let maxPointAngle = Math.PI + 2 * Math.PI / tweaks.cloverLeaves;
+  let radius = Math.min(tweaks.potteryHeight, tweaks.patternWidth) / 4.0 - holeRadiusL;
+  let u = new THREE.Vector3(0, 0, 0);
+  let v = new THREE.Vector3(0, 0, 0);
+  let reverse = tweaks.cloverReverse ? -1 : 1;
+  let pos = new THREE.Vector3(0, 0, 0);
+  for (let i = 0; i < tweaks.cloverLeaves; i++) {
+    let leafAngle = anglePerLeaf * i;
+    u.x = reverse * Math.cos(leafAngle);
+    u.y = reverse * Math.sin(leafAngle);
+    v.x = -Math.sin(leafAngle);
+    v.y = Math.cos(leafAngle);
+    for (let j = 1; j < tweaks.cloverPoints; j++) {
+      let pointAngle = j * maxPointAngle / tweaks.cloverPoints;
+      pos.setScalar(0);
+      pos.addScaledVector(v, radius * (1.0 - Math.cos(pointAngle)));
+      pos.addScaledVector(u, radius * Math.sin(pointAngle));
+      addInstance(utils.holeGeometryS, utils.holeMaterial, pos.x, pos.y);
+    }
+  }
+
+  addInstance(utils.holeGeometryS, utils.holeMaterial, 0, 0);
 }
