@@ -59,8 +59,9 @@ onDocReady(function() {
 
         // Clover
         'cloverLeaves': new TweakConfig('int'),
-        'cloverPoints': new TweakConfig('int'),
         'cloverReverse': new TweakConfig('checkbox'),
+        'cloverPoints': new TweakConfig('int'),
+        'cloverLineThickness': new TweakConfig('float'),
       },
       () => initGeometry());
 
@@ -378,8 +379,13 @@ function initSpiralGeometry(utils) {
 }
 
 function initCloverGeometry(utils) {
+  // This is the angle between each pair of leaves as well as the angle at which one leaf's
+  // curve hits the next leaf's curve.
   let anglePerLeaf = 2.0 * Math.PI / tweaks.cloverLeaves;
+  // This is the angle at which one leaf touches the next
   let maxPointAngle = Math.PI + 2 * Math.PI / tweaks.cloverLeaves;
+  // We need to decrease that according to the line thickness
+  maxPointAngle -= tweaks.cloverLineThickness / (2 * Math.sin(anglePerLeaf));
   let radius = Math.min(tweaks.potteryHeight, tweaks.patternWidth) / 4.0 - holeRadiusL;
   let u = new THREE.Vector3(0, 0, 0);
   let v = new THREE.Vector3(0, 0, 0);

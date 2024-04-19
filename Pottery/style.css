@@ -35,6 +35,8 @@ body {
 }
 
 .tweak-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .canvas-wrapper {
