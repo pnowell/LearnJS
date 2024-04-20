@@ -62,6 +62,8 @@ onDocReady(function() {
         'cloverReverse': new TweakConfig('checkbox'),
         'cloverPoints': new TweakConfig('int'),
         'cloverLineThickness': new TweakConfig('float'),
+        'cloverLayers': new TweakConfig('int'),
+        'cloverMaxInnerLayers': new TweakConfig('int'),
       },
       () => initGeometry());
 
@@ -385,8 +387,9 @@ function initCloverGeometry(utils) {
   // This is the angle at which one leaf touches the next
   let maxPointAngle = Math.PI + 2 * Math.PI / tweaks.cloverLeaves;
   // We need to decrease that according to the line thickness
-  maxPointAngle -= tweaks.cloverLineThickness / (2 * Math.sin(anglePerLeaf));
-  let radius = Math.min(tweaks.potteryHeight, tweaks.patternWidth) / 4.0 - holeRadiusL;
+  let radius = Math.min(tweaks.potteryHeight, tweaks.patternWidth) / 4.0
+      - holeRadiusL - tweaks.cloverLineThickness;
+  maxPointAngle -= tweaks.cloverLineThickness / (2 * radius * Math.sin(anglePerLeaf));
   let u = new THREE.Vector3(0, 0, 0);
   let v = new THREE.Vector3(0, 0, 0);
   let reverse = tweaks.cloverReverse ? -1 : 1;
@@ -398,11 +401,32 @@ function initCloverGeometry(utils) {
     v.x = -Math.sin(leafAngle);
     v.y = Math.cos(leafAngle);
     for (let j = 1; j < tweaks.cloverPoints; j++) {
-      let pointAngle = j * maxPointAngle / tweaks.cloverPoints;
+      let t = j / tweaks.cloverPoints;
+      let pointAngle = maxPointAngle * t;
       pos.setScalar(0);
       pos.addScaledVector(v, radius * (1.0 - Math.cos(pointAngle)));
       pos.addScaledVector(u, radius * Math.sin(pointAngle));
       addInstance(utils.holeGeometryS, utils.holeMaterial, pos.x, pos.y);
+
+      if (clover.cloverLayers < 1) continue;
+
+      // How many layers to expand
+      let interp = 16 * (t*t*t*t - 2*t*t*t + t*t);
+      let layers = Math.round(tweaks.cloverLayers * interp);
+      let layerThickness = tweaks.cloverLineThickness / tweaks.cloverLayers;
+      for (let k = 1; k <= layers; k++) {
+        let layerT = (k % 2 == 0) ? t : (j + 0.5) / tweaks.cloverPoints;
+        let layerAngle = maxPointAngle * layerT;
+        let rdiff = layerThickness * k;
+        for (let s = -1; s <= 1; s += 2) {
+          if (s == -1 && k >= tweaks.cloverMaxInnerLayers) continue;
+          let layerRadius = radius + s * rdiff;
+          pos.setScalar(0);
+          pos.addScaledVector(v, radius - layerRadius * Math.cos(layerAngle));
+          pos.addScaledVector(u, layerRadius * Math.sin(layerAngle));
+          addInstance(utils.holeGeometryS, utils.holeMaterial, pos.x, pos.y);
+        }
+      }
     }
   }
 
