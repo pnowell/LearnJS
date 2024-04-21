@@ -62,6 +62,9 @@ onDocReady(function() {
         'cloverLineThickness': new TweakConfig('float'),
         'cloverLayers': new TweakConfig('int'),
         'cloverMaxInnerLayers': new TweakConfig('int'),
+        'cloverBorderPointSpacing': new TweakConfig('float'),
+        'cloverBorderLayerSpacing': new TweakConfig('float'),
+        'cloverXOffset': new TweakConfig('float'),
       },
       () => initGeometry());
 
@@ -403,6 +406,7 @@ function initCloverGeometry(utils) {
   let v = new THREE.Vector3(0, 0, 0);
   let reverse = tweaks.cloverReverse ? -1 : 1;
   let pos = new THREE.Vector3(0, 0, 0);
+  let xOffset = -tweaks.patternWidth * tweaks.cloverXOffset;
   for (let i = 0; i < tweaks.cloverLeaves; i++) {
     let leafAngle = anglePerLeaf * i;
     u.x = reverse * Math.cos(leafAngle);
@@ -419,7 +423,7 @@ function initCloverGeometry(utils) {
       let geo = j < (3 * tweaks.cloverPoints / 4)
           ? utils.holeGeometryM
           : utils.holeGeometryS;
-      addInstance(geo, pos.x, pos.y);
+      addInstance(geo, pos.x + xOffset, pos.y);
 
       if (clover.cloverLayers < 1) continue;
 
@@ -437,11 +441,23 @@ function initCloverGeometry(utils) {
           pos.setScalar(0);
           pos.addScaledVector(v, radius - layerRadius * Math.cos(layerAngle));
           pos.addScaledVector(u, layerRadius * Math.sin(layerAngle));
-          addInstance(utils.holeGeometryS, pos.x, pos.y);
+          addInstance(utils.holeGeometryS, pos.x + xOffset, pos.y);
         }
       }
     }
   }
 
-  addInstance(utils.holeGeometryL, 0, 0);
+  addInstance(utils.holeGeometryL, xOffset, 0);
+
+  let borderLX = -tweaks.patternWidth / 2 + 1.6;
+  let borderMX = borderLX + tweaks.cloverBorderLayerSpacing + (holeRadiusL + holeRadiusM) / 2;
+  let borderSX = borderMX + tweaks.cloverBorderLayerSpacing + (holeRadiusM + holeRadiusS) / 2;
+  let incrementY = tweaks.cloverBorderPointSpacing + holeRadiusL;
+  for (let borderY = tweaks.potteryThickness + 0.1 - tweaks.potteryHeight / 2;
+       borderY < tweaks.potteryHeight / 2;
+       borderY += incrementY) {
+    addInstance(utils.holeGeometryL, borderLX, borderY);
+    addInstance(utils.holeGeometryM, borderMX, borderY + incrementY / 2);
+    addInstance(utils.holeGeometryS, borderSX, borderY);
+  }
 }
