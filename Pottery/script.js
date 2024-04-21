@@ -384,12 +384,19 @@ function initCloverGeometry(utils) {
   // This is the angle between each pair of leaves as well as the angle at which one leaf's
   // curve hits the next leaf's curve.
   let anglePerLeaf = 2.0 * Math.PI / tweaks.cloverLeaves;
-  // This is the angle at which one leaf touches the next
-  let maxPointAngle = Math.PI + 2 * Math.PI / tweaks.cloverLeaves;
   // We need to decrease that according to the line thickness
   let radius = Math.min(tweaks.potteryHeight, tweaks.patternWidth) / 4.0
-      - holeRadiusL - tweaks.cloverLineThickness;
-  maxPointAngle -= tweaks.cloverLineThickness / (2 * radius * Math.sin(anglePerLeaf));
+      - holeRadiusL - tweaks.cloverLineThickness / 2;
+  let radiusOuter = radius + tweaks.cloverLineThickness / 2;
+  // The distance between two leaf centers
+  let d1 = radius * (1 - Math.cos(anglePerLeaf));
+  let d2 = radius * Math.sin(anglePerLeaf);
+  let leafDist = Math.sqrt((d1 * d1) + (d2 * d2));
+  // The full angle (including the initial 180 degrees)
+  let maxFullAngle = (anglePerLeaf + Math.PI) / 2 + Math.acos(
+      (radiusOuter * radiusOuter - radius * radius - leafDist * leafDist)
+      / (2 * radius * leafDist));
+
   let u = new THREE.Vector3(0, 0, 0);
   let v = new THREE.Vector3(0, 0, 0);
   let reverse = tweaks.cloverReverse ? -1 : 1;
@@ -400,9 +407,10 @@ function initCloverGeometry(utils) {
     u.y = reverse * Math.sin(leafAngle);
     v.x = -Math.sin(leafAngle);
     v.y = Math.cos(leafAngle);
+
     for (let j = 1; j < tweaks.cloverPoints; j++) {
       let t = j / tweaks.cloverPoints;
-      let pointAngle = maxPointAngle * t;
+      let pointAngle = maxFullAngle * t;
       pos.setScalar(0);
       pos.addScaledVector(v, radius * (1.0 - Math.cos(pointAngle)));
       pos.addScaledVector(u, radius * Math.sin(pointAngle));
@@ -416,8 +424,8 @@ function initCloverGeometry(utils) {
       let layerThickness = tweaks.cloverLineThickness / tweaks.cloverLayers;
       for (let k = 1; k <= layers; k++) {
         let layerT = (k % 2 == 0) ? t : (j + 0.5) / tweaks.cloverPoints;
-        let layerAngle = maxPointAngle * layerT;
-        let rdiff = layerThickness * k;
+        let layerAngle = maxFullAngle * layerT;
+        let rdiff = layerThickness * 0.5 * k;
         for (let s = -1; s <= 1; s += 2) {
           if (s == -1 && k >= tweaks.cloverMaxInnerLayers) continue;
           let layerRadius = radius + s * rdiff;
