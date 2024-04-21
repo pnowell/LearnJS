@@ -23,9 +23,6 @@ onDocReady(function() {
   canvas2d.style.width = "100%";
   canvas2d.style.height = "100%";
 
-  document.getElementById('savePatternButton')
-    .addEventListener('click', savePattern);
-
   tweaks = new Tweaks(
       {
         'potteryRadius': new TweakConfig('float', (t, isInit) => {
@@ -414,13 +411,16 @@ function initCloverGeometry(utils) {
       pos.setScalar(0);
       pos.addScaledVector(v, radius * (1.0 - Math.cos(pointAngle)));
       pos.addScaledVector(u, radius * Math.sin(pointAngle));
-      addInstance(utils.holeGeometryS, utils.holeMaterial, pos.x, pos.y);
+      let geo = j < (3 * tweaks.cloverPoints / 4)
+          ? utils.holeGeometryM
+          : utils.holeGeometryS;
+      addInstance(geo, utils.holeMaterial, pos.x, pos.y);
 
       if (clover.cloverLayers < 1) continue;
 
       // How many layers to expand
       let interp = 16 * (t*t*t*t - 2*t*t*t + t*t);
-      let layers = Math.round(tweaks.cloverLayers * interp);
+      let layers = 1 + Math.round((tweaks.cloverLayers - 1) * interp);
       let layerThickness = tweaks.cloverLineThickness / tweaks.cloverLayers;
       for (let k = 1; k <= layers; k++) {
         let layerT = (k % 2 == 0) ? t : (j + 0.5) / tweaks.cloverPoints;
@@ -438,5 +438,5 @@ function initCloverGeometry(utils) {
     }
   }
 
-  addInstance(utils.holeGeometryS, utils.holeMaterial, 0, 0);
+  addInstance(utils.holeGeometryL, utils.holeMaterial, 0, 0);
 }
