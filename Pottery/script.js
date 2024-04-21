@@ -8,6 +8,7 @@ let renderer, renderer2d, canvas, canvas2d, scene, scene2d, camera, camera2d, co
 let tweaks;
 let pottery = null;
 let pattern = null;
+let utils = {};
 const dfov = 40.0;
 const paperWidth = 27.94;
 const paperHeight = 21.59;
@@ -78,7 +79,7 @@ onDocReady(function() {
   controls.target = new THREE.Vector3(0, tweaks.potteryHeight / 2, 0);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf0f0f0);
+  scene.background = new THREE.Color(0x505050);
   scene.add(new THREE.GridHelper(60, 12));
   scene.add(new THREE.AxesHelper(30));
   scene.add(new THREE.HemisphereLight(0xbbbbbb, 0x777777, 3));
@@ -212,7 +213,7 @@ function createPottery() {
     new THREE.Vector2(0.0, tweaks.potteryThickness));
   const geometry = new THREE.LatheGeometry(points, 30);
   const material = new THREE.MeshPhongMaterial({
-    color: 0xccccff,
+    color: 0x444499,
     flatShading: false,
   });
   return new THREE.Mesh(geometry, material);
@@ -255,7 +256,7 @@ function createPattern() {
   return patternModel;
 }
 
-function addInstance(geometry, material, x, y) {
+function addInstance(geometry, x, y) {
   let midRadius = tweaks.potteryRadius - tweaks.potteryThickness / 2;
   const angle = x * 2 * Math.PI / tweaks.patternWidth;
   let potteryY = y + 0.5 * tweaks.potteryHeight;
@@ -267,7 +268,7 @@ function addInstance(geometry, material, x, y) {
     return;
   }
 
-  let mesh = new THREE.Mesh(geometry, material);
+  let mesh = new THREE.Mesh(geometry, utils.holeMaterial3d);
   mesh.position.set(
     Math.cos(angle) * midRadius,
     potteryY,
@@ -283,7 +284,7 @@ function addInstance(geometry, material, x, y) {
   );
   pottery.add(mesh);
 
-  mesh = new THREE.Mesh(geometry, material);
+  mesh = new THREE.Mesh(geometry, utils.holeMaterial2d);
   mesh.position.set(x, y, 0.0);
   mesh.rotateOnAxis(new THREE.Vector3(1.0, 0.0, 0.0), Math.PI / 2);
   pattern.add(mesh);
@@ -305,7 +306,7 @@ function initGeometry() {
   pattern = createPattern();
   scene2d.add(pattern);
 
-  let utils = {};
+  utils = {}
   utils.holeGeometryS = new THREE.CylinderGeometry(
     /* radiusTop= */ holeRadiusS,
     /* radiusBottom= */ holeRadiusS,
@@ -327,7 +328,11 @@ function initGeometry() {
     /* radialSegments= */ 15,
     /* heightSegments= */ 1
   );
-  utils.holeMaterial = new THREE.MeshPhongMaterial({
+  utils.holeMaterial3d = new THREE.MeshPhongMaterial({
+    color: 0xffff55,
+    flatShading: true,
+  });
+  utils.holeMaterial2d = new THREE.MeshPhongMaterial({
     color: 0x000000,
     flatShading: true,
   });
@@ -367,11 +372,11 @@ function initSpiralGeometry(utils) {
       x -= tweaks.patternWidth * tweaks.spiralXOffset;
       y += tweaks.potteryHeight * tweaks.spiralYOffset;
       if (point < tweaks.numPointsS) {
-        addInstance(utils.holeGeometryS, utils.holeMaterial, x, y);
+        addInstance(utils.holeGeometryS, x, y);
       } else if (point < tweaks.numPointsS + tweaks.numPointsM) {
-        addInstance(utils.holeGeometryM, utils.holeMaterial, x, y);
+        addInstance(utils.holeGeometryM, x, y);
       } else {
-        addInstance(utils.holeGeometryL, utils.holeMaterial, x, y);
+        addInstance(utils.holeGeometryL, x, y);
       }
     }
   }
@@ -414,7 +419,7 @@ function initCloverGeometry(utils) {
       let geo = j < (3 * tweaks.cloverPoints / 4)
           ? utils.holeGeometryM
           : utils.holeGeometryS;
-      addInstance(geo, utils.holeMaterial, pos.x, pos.y);
+      addInstance(geo, pos.x, pos.y);
 
       if (clover.cloverLayers < 1) continue;
 
@@ -432,11 +437,11 @@ function initCloverGeometry(utils) {
           pos.setScalar(0);
           pos.addScaledVector(v, radius - layerRadius * Math.cos(layerAngle));
           pos.addScaledVector(u, layerRadius * Math.sin(layerAngle));
-          addInstance(utils.holeGeometryS, utils.holeMaterial, pos.x, pos.y);
+          addInstance(utils.holeGeometryS, pos.x, pos.y);
         }
       }
     }
   }
 
-  addInstance(utils.holeGeometryL, utils.holeMaterial, 0, 0);
+  addInstance(utils.holeGeometryL, 0, 0);
 }
