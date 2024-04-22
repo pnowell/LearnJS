@@ -93,7 +93,7 @@ onDocReady(function() {
   scene.add(dirLight.target);
 
   camera2d = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 350);
-  camera2d.position.set(0, 0, -70);
+  camera2d.position.set(0, 0, 70);
   camera2d.lookAt(0, 0, 0);
   
   renderer2d = new THREE.WebGLRenderer({canvas: canvas2d});
@@ -156,7 +156,7 @@ function updateCamera2D(setRendererSize) {
     camWidth = camHeight * canvasAspect;
   }
 
-  camera2d.position.set(0, 0, -10);
+  camera2d.position.set(0, 0, 10);
   camera2d.lookAt(0, 0, 0);
   camera2d.left = -camWidth / 2;
   camera2d.right = camWidth / 2;
@@ -275,13 +275,13 @@ function addInstance(geometry, x, y) {
   mesh.position.set(
     Math.cos(angle) * midRadius,
     potteryY,
-    Math.sin(angle) * midRadius
+    -Math.sin(angle) * midRadius
   );
   mesh.rotateOnAxis(
     new THREE.Vector3(
       Math.sin(angle),
       0.0,
-      -Math.cos(angle)
+      Math.cos(angle)
     ),
     Math.PI / 2
   );
@@ -372,7 +372,7 @@ function initSpiralGeometry(utils) {
       let spiralCurrAngle = spiralStartAngle + tweaks.spiralArcAngle * param;
       let x = spiralCurrRadius * Math.cos(spiralCurrAngle);
       let y = spiralCurrRadius * Math.sin(spiralCurrAngle);
-      x -= tweaks.patternWidth * tweaks.spiralXOffset;
+      x += tweaks.patternWidth * tweaks.spiralXOffset;
       y += tweaks.potteryHeight * tweaks.spiralYOffset;
       if (point < tweaks.numPointsS) {
         addInstance(utils.holeGeometryS, x, y);
@@ -406,7 +406,7 @@ function initCloverGeometry(utils) {
   let v = new THREE.Vector3(0, 0, 0);
   let reverse = tweaks.cloverReverse ? -1 : 1;
   let pos = new THREE.Vector3(0, 0, 0);
-  let xOffset = -tweaks.patternWidth * tweaks.cloverXOffset;
+  let xOffset = tweaks.patternWidth * tweaks.cloverXOffset;
   for (let i = 0; i < tweaks.cloverLeaves; i++) {
     let leafAngle = anglePerLeaf * i;
     u.x = reverse * Math.cos(leafAngle);
