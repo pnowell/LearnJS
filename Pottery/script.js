@@ -62,6 +62,7 @@ onDocReady(function() {
         'cloverLineThickness': new TweakConfig('float'),
         'cloverLayers': new TweakConfig('int'),
         'cloverMaxInnerLayers': new TweakConfig('int'),
+        'cloverBorderOffset': new TweakConfig('float'),
         'cloverBorderPointSpacing': new TweakConfig('float'),
         'cloverBorderLayerSpacing': new TweakConfig('float'),
         'cloverXOffset': new TweakConfig('float'),
@@ -449,10 +450,9 @@ function initCloverGeometry(utils) {
 
   addInstance(utils.holeGeometryL, xOffset, 0);
 
-  let borderLX = -tweaks.patternWidth / 2 + 1.6;
+  let borderLX = -tweaks.patternWidth / 2 + 1.6 + tweaks.cloverBorderOffset;
   let borderMX = borderLX + tweaks.cloverBorderLayerSpacing + (holeRadiusL + holeRadiusM) / 2;
   let borderSX = borderMX + tweaks.cloverBorderLayerSpacing + (holeRadiusM + holeRadiusS) / 2;
-  //let oppositeSide = borderLX + borderLX + 24.0;
   let mirrorOffset = 26.0 - paperWidth;
   let incrementY = tweaks.cloverBorderPointSpacing + holeRadiusL;
   for (let borderY = tweaks.potteryThickness + 0.1 - tweaks.potteryHeight / 2;
