@@ -2,6 +2,7 @@ import { onDocReady, animationLoopWrapper, diagonalToVerticalFov, toDeg, toRad }
 import { TweakConfig, Tweaks, OnTweakPanelSelected } from '/LearnJS/common/tweaks.js';
 
 import * as THREE from 'https://unpkg.com/three/build/three.module.js'
+// import * as THREE from '/three/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js?module'
 
 let renderer, renderer2d, canvas, canvas2d, scene, scene2d, camera, camera2d, controls;
